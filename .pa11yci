@@ -1,0 +1,119 @@
+{
+  "defaults": {
+    "standard": "WCAG2AA",
+    "runners": ["axe", "htmlcs"],
+    "includeNotices": false,
+    "includeWarnings": true,
+    "timeout": 30000,
+    "wait": 1000,
+    "chromeLaunchConfig": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    },
+    "viewport": {
+      "width": 1280,
+      "height": 1024
+    },
+    "actions": [
+      "wait for element body to be visible",
+      "set field #theme to high-contrast",
+      "wait for element .high-contrast to be visible"
+    ],
+    "headers": {
+      "Accept-Language": "en-US,en;q=0.9"
+    }
+  },
+  "urls": [
+    {
+      "url": "http://localhost:3000/",
+      "label": "Home Page",
+      "actions": [
+        "wait for element body to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:3000/login",
+      "label": "Login Page",
+      "actions": [
+        "wait for element form to be visible",
+        "set field #email to test@example.com",
+        "set field #password to testpassword123",
+        "check field #remember",
+        "wait for element button[type=submit] to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:3000/dashboard",
+      "label": "Dashboard",
+      "actions": [
+        "wait for element .dashboard-content to be visible"
+      ]
+    },
+    {
+      "url": "http://localhost:3000/settings",
+      "label": "Settings Page",
+      "actions": [
+        "wait for element form to be visible",
+        "click element #enable-notifications",
+        "wait for element .notification-settings to be visible"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "Colorblind Testing - Deuteranopia",
+      "url": "http://localhost:3000/",
+      "actions": [
+        "inject css body { filter: url('#deuteranopia'); }",
+        "wait for element body to be visible"
+      ]
+    },
+    {
+      "name": "Colorblind Testing - Protanopia",
+      "url": "http://localhost:3000/",
+      "actions": [
+        "inject css body { filter: url('#protanopia'); }",
+        "wait for element body to be visible"
+      ]
+    },
+    {
+      "name": "Colorblind Testing - Tritanopia",
+      "url": "http://localhost:3000/",
+      "actions": [
+        "inject css body { filter: url('#tritanopia'); }",
+        "wait for element body to be visible"
+      ]
+    },
+    {
+      "name": "High Contrast Mode",
+      "url": "http://localhost:3000/",
+      "actions": [
+        "inject css body { filter: contrast(2); }",
+        "wait for element body to be visible"
+      ]
+    },
+    {
+      "name": "Keyboard Navigation",
+      "url": "http://localhost:3000/",
+      "actions": [
+        "press Tab",
+        "wait for element :focus to be visible",
+        "press Tab",
+        "press Tab",
+        "press Enter"
+      ]
+    },
+    {
+      "name": "Mobile Viewport",
+      "url": "http://localhost:3000/",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      },
+      "actions": [
+        "wait for element body to be visible",
+        "click element .mobile-menu-toggle",
+        "wait for element .mobile-menu to be visible"
+      ]
+    }
+  ]
+}

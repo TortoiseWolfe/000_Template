@@ -1,0 +1,293 @@
+version: '3.8'
+
+services:
+  # ====================
+  # Frontend Service (if applicable)
+  # ====================
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_VERSION=20
+    container_name: ${APP_NAME:-project}_frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./src/frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:${BACKEND_PORT:-5000}
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=0
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # Backend Service (Node.js)
+  # ====================
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_VERSION=20
+    container_name: ${APP_NAME:-project}_backend
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+      - "9229:9229" # Node.js debugging port
+    volumes:
+      - ./src/backend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/${DB_NAME:-projectdb}
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-development_secret_change_in_production}
+      - SESSION_SECRET=${SESSION_SECRET:-development_session_secret}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: npm run dev
+
+  # ====================
+  # Backend Service (Python/FastAPI alternative)
+  # ====================
+  backend-python:
+    profiles: ["python"]
+    build:
+      context: ./src/backend-python
+      dockerfile: Dockerfile.dev
+      args:
+        - PYTHON_VERSION=3.11
+    container_name: ${APP_NAME:-project}_backend_python
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+      - "5678:5678" # Python debugging port
+    volumes:
+      - ./src/backend-python:/app
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/${DB_NAME:-projectdb}
+      - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=${SECRET_KEY:-development_secret_key}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+  # ====================
+  # PostgreSQL Database
+  # ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${APP_NAME:-project}_postgres
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
+      - POSTGRES_DB=${DB_NAME:-projectdb}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # Redis Cache
+  # ====================
+  redis:
+    image: redis:7-alpine
+    container_name: ${APP_NAME:-project}_redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # ====================
+  # MongoDB (Alternative/Additional Database)
+  # ====================
+  mongodb:
+    profiles: ["mongo"]
+    image: mongo:6
+    container_name: ${APP_NAME:-project}_mongodb
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-admin}
+      - MONGO_INITDB_DATABASE=${MONGO_DB:-projectdb}
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init.js
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # Nginx Reverse Proxy
+  # ====================
+  nginx:
+    profiles: ["production"]
+    image: nginx:alpine
+    container_name: ${APP_NAME:-project}_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/sites:/etc/nginx/sites-available
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # Adminer (Database GUI)
+  # ====================
+  adminer:
+    profiles: ["tools"]
+    image: adminer:latest
+    container_name: ${APP_NAME:-project}_adminer
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+      - ADMINER_DESIGN=pepa-linha
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # Mailhog (Email Testing)
+  # ====================
+  mailhog:
+    profiles: ["tools"]
+    image: mailhog/mailhog:latest
+    container_name: ${APP_NAME:-project}_mailhog
+    ports:
+      - "1025:1025" # SMTP port
+      - "8025:8025" # Web UI
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # MinIO (S3-compatible Storage)
+  # ====================
+  minio:
+    profiles: ["storage"]
+    image: minio/minio:latest
+    container_name: ${APP_NAME:-project}_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+
+  # ====================
+  # Elasticsearch (Search/Logging)
+  # ====================
+  elasticsearch:
+    profiles: ["search"]
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: ${APP_NAME:-project}_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # ====================
+  # Kibana (Elasticsearch UI)
+  # ====================
+  kibana:
+    profiles: ["search"]
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: ${APP_NAME:-project}_kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - app-network
+    restart: unless-stopped
+
+# ====================
+# Networks
+# ====================
+networks:
+  app-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ====================
+# Volumes
+# ====================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  minio_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
