@@ -1,348 +1,250 @@
-# Contributing to PROJECT_NAME
+# Contributing to 000_Template
 
-Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to this project.
+Thank you for considering contributing to this project! We welcome contributions from everyone.
 
-## 📋 Table of Contents
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Process](#development-process)
-- [Coding Standards](#coding-standards)
-- [Testing Requirements](#testing-requirements)
-- [Pull Request Process](#pull-request-process)
-- [Documentation](#documentation)
+## Code of Conduct
 
-## 📜 Code of Conduct
-
-### Our Pledge
-We are committed to providing a friendly, safe, and welcoming environment for all contributors.
-
-### Expected Behavior
+By participating in this project, you agree to abide by our Code of Conduct:
 - Be respectful and inclusive
 - Welcome newcomers and help them get started
 - Focus on constructive criticism
-- Accept feedback gracefully
-- Prioritize accessibility and security
+- Respect different viewpoints and experiences
 
-### Unacceptable Behavior
-- Harassment or discrimination
-- Trolling or insulting comments
-- Public or private harassment
-- Publishing private information
-- Any unprofessional conduct
+## How to Contribute
 
-## 🚀 Getting Started
+### Reporting Bugs
 
-### Prerequisites
-1. Fork the repository
-2. Clone your fork:
+Before creating bug reports, please check existing issues to avoid duplicates.
+
+**To report a bug:**
+1. Use the issue tracker to create a new issue
+2. Use the bug report template
+3. Include:
+   - Clear, descriptive title
+   - Steps to reproduce
+   - Expected behavior
+   - Actual behavior
+   - Screenshots (if applicable)
+   - Environment details
+
+### Suggesting Features
+
+**To suggest a feature:**
+1. Check if the feature has already been suggested
+2. Create a new issue using the feature request template
+3. Include:
+   - Use case and motivation
+   - Proposed solution
+   - Alternative solutions considered
+   - Additional context
+
+### Development Process
+
+1. **Fork the Repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/PROJECT_NAME.git
-   cd PROJECT_NAME
+   git clone https://github.com/your-username/000_Template.git
+   cd 000_Template
    ```
 
-3. Set up upstream remote:
-   ```bash
-   git remote add upstream https://github.com/TortoiseWolfe/PROJECT_NAME.git
-   ```
-
-4. Install dependencies:
+2. **Set Up Development Environment**
    ```bash
    npm install
    cp .env.example .env
    ```
 
-### Development Setup
-```bash
-# Start development environment
-docker-compose up
+3. **Create a Feature Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-# Or run locally
-npm run dev
-```
+4. **Make Your Changes**
+   - Follow the coding standards below
+   - Write/update tests
+   - Update documentation
 
-## 🔄 Development Process
+5. **Run Validation**
+   ```bash
+   npm run lint
+   npm run type-check
+   npm run test
+   npm run test:a11y
+   ```
 
-### 1. Create a Feature Branch
-```bash
-git checkout -b feature/your-feature-name
-# Or for bugs: bug/issue-description
-```
+6. **Commit Your Changes**
+   ```bash
+   git add .
+   git commit -m "feat: add new feature
 
-### 2. Create a PRP Document
-Before coding, document your approach:
-```bash
-cp PRPs/templates/prp_base.md PRPs/your-feature.md
-```
+   - Detail 1
+   - Detail 2
 
-Include:
-- Clear goal and success criteria
-- Current vs desired state
-- Task breakdown
-- Validation loops
-- Anti-patterns to avoid
+   Closes #123"
+   ```
 
-### 3. Write Tests First (TDD)
-```javascript
-// Start with a failing test
-describe('YourFeature', () => {
-  it('should do something specific', () => {
-    // Test implementation
-  });
-});
-```
+7. **Push to Your Fork**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
 
-### 4. Implement Feature
-- Follow examples in `examples/` directory
-- Keep functions under 50 lines
-- Ensure accessibility (ARIA labels, keyboard nav)
-- No color-only information
+8. **Create Pull Request**
+   - Use the PR template
+   - Link related issues
+   - Ensure CI passes
 
-### 5. Run Validation Loops
-```bash
-# Level 1: Syntax
-npm run lint:fix && npm run format
+## Coding Standards
 
-# Level 2: Types
-npm run type-check
-
-# Level 3: Unit Tests
-npm run test:unit
-
-# Level 4: Integration
-npm run test:integration
-
-# Level 5: Accessibility
-npm run test:a11y
-
-# Level 6: Performance
-npm run lighthouse
-```
-
-## 📝 Coding Standards
+### General Guidelines
+- Write clean, readable, and maintainable code
+- Follow existing patterns in the codebase
+- Keep functions small and focused
+- Use meaningful variable and function names
+- Add comments for complex logic
 
 ### JavaScript/TypeScript
-```javascript
-// Use meaningful variable names
-const userAuthenticationToken = generateToken(); // ✅
-const token = genTkn(); // ❌
+- Use TypeScript for type safety
+- Follow ESLint configuration
+- Use Prettier for formatting
+- Prefer `const` over `let`
+- Use async/await over callbacks
+- Handle errors appropriately
 
-// Prefer async/await over callbacks
-async function fetchUserData(userId) {
-  try {
-    const user = await api.getUser(userId);
-    return user;
-  } catch (error) {
-    logger.error('Failed to fetch user:', error);
-    throw new UserFetchError(error.message);
-  }
-}
+### Testing
+- Write tests for new features
+- Maintain >80% code coverage
+- Include unit, integration, and E2E tests
+- Test accessibility compliance
+- Test error scenarios
 
-// Always handle errors explicitly
+### Documentation
+- Update README if needed
+- Add JSDoc comments for functions
+- Update API documentation
+- Include examples for complex features
+
+### Accessibility
+- Ensure WCAG 2.1 AA compliance
+- Test with screen readers
+- Test keyboard navigation
+- Include appropriate ARIA labels
+- Test color contrast ratios
+
+## Commit Message Guidelines
+
+We follow Conventional Commits specification:
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
 ```
 
-### Component Structure (React Example)
-```jsx
-import { useState, useCallback } from 'react';
-import PropTypes from 'prop-types';
-
-export function Component({ title, onAction }) {
-  const [state, setState] = useState(false);
-  
-  const handleClick = useCallback(() => {
-    setState(prev => !prev);
-    onAction?.(state);
-  }, [state, onAction]);
-  
-  return (
-    <button 
-      onClick={handleClick}
-      aria-pressed={state}
-      aria-label={title}
-    >
-      {title}
-    </button>
-  );
-}
-
-Component.propTypes = {
-  title: PropTypes.string.isRequired,
-  onAction: PropTypes.func
-};
-```
-
-### CSS/Styling
-- Use CSS modules or styled-components
-- Follow design system tokens
-- Ensure 4.5:1 contrast ratio minimum
-- Test with colorblind filters
-
-### Git Commit Messages
-Format: `type(scope): description`
-
-Types:
+### Types
 - `feat`: New feature
 - `fix`: Bug fix
-- `docs`: Documentation
-- `style`: Formatting, missing semicolons, etc.
-- `refactor`: Code restructuring
-- `test`: Adding tests
-- `chore`: Maintenance
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, etc.)
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Test additions or corrections
+- `build`: Build system changes
+- `ci`: CI configuration changes
+- `chore`: Maintenance tasks
 
-Examples:
+### Examples
 ```bash
-feat(auth): add OAuth2 login support
-fix(api): handle rate limiting errors
-docs(readme): update deployment instructions
-test(a11y): add colorblind accessibility tests
+feat(auth): add OAuth2 integration
+
+- Add Google OAuth provider
+- Add Facebook OAuth provider
+- Update authentication middleware
+
+Closes #45
 ```
 
-## 🧪 Testing Requirements
+```bash
+fix(api): handle null response in user endpoint
 
-### Coverage Requirements
-- Unit tests: >80% coverage
-- Integration tests: All API endpoints
-- E2E tests: Critical user paths
-- Accessibility tests: All pages
+Prevent crash when user data is null
 
-### Writing Tests
-```javascript
-describe('Feature', () => {
-  // Arrange
-  beforeEach(() => {
-    // Setup
-  });
-  
-  // Act & Assert
-  it('should handle normal case', () => {
-    // Test implementation
-  });
-  
-  it('should handle edge case', () => {
-    // Edge case test
-  });
-  
-  it('should handle error case', () => {
-    // Error handling test
-  });
-  
-  // Cleanup
-  afterEach(() => {
-    // Cleanup
-  });
-});
+Fixes #67
 ```
 
-### Accessibility Testing
-Every feature must:
-- Pass WCAG 2.1 AA standards
-- Work without color (colorblind safe)
-- Support keyboard navigation
-- Work with screen readers
-- Have proper ARIA labels
+## Pull Request Process
 
-## 🔀 Pull Request Process
+1. **Before Submitting**
+   - Update documentation
+   - Add/update tests
+   - Run all validation commands
+   - Update CHANGELOG.md if applicable
 
-### Before Submitting
-1. Update from upstream:
-   ```bash
-   git fetch upstream
-   git rebase upstream/main
-   ```
+2. **PR Requirements**
+   - Clear, descriptive title
+   - Complete PR template
+   - Link related issues
+   - Pass all CI checks
+   - Have at least one approval
 
-2. Ensure all tests pass:
-   ```bash
-   npm run validate:all
-   ```
+3. **Review Process**
+   - Address reviewer feedback
+   - Keep PR focused and small
+   - Respond to comments promptly
+   - Update branch with main if needed
 
-3. Update documentation if needed
+## Testing Requirements
 
-### PR Template
-```markdown
-## Description
-Brief description of changes
+All contributions must include appropriate tests:
 
-## Type of Change
-- [ ] Bug fix
-- [ ] New feature
-- [ ] Breaking change
-- [ ] Documentation update
+### Required Tests
+- Unit tests for business logic
+- Integration tests for APIs
+- E2E tests for user workflows
+- Accessibility tests for UI changes
+- Performance tests for critical paths
 
-## Testing
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] E2E tests pass
-- [ ] Accessibility tests pass
+### Running Tests
+```bash
+# All tests
+npm run test
 
-## Checklist
-- [ ] Code follows style guidelines
-- [ ] Self-review completed
-- [ ] Documentation updated
-- [ ] No new warnings
-- [ ] Tests added/updated
-- [ ] PR title follows conventional commits
+# Specific suites
+npm run test:unit
+npm run test:integration
+npm run test:e2e
+npm run test:a11y
 
-## Related Issues
-Fixes #123
+# With coverage
+npm run test:coverage
 ```
 
-### Review Process
-1. Automated checks must pass
-2. At least one reviewer approval required
-3. Resolve all conversations
-4. Squash and merge preferred
+## Security
 
-## 📚 Documentation
+### Security Issues
+- **DO NOT** create public issues for security vulnerabilities
+- Email security@example.com instead
+- Include detailed description and proof of concept
+- Allow time for patching before disclosure
 
-### Where to Document
-- **Code**: JSDoc/docstrings for functions
-- **API**: OpenAPI/Swagger specs
-- **Features**: Update relevant .md files
-- **Architecture**: ADR for decisions
+### Security Best Practices
+- Never commit secrets or credentials
+- Validate and sanitize all inputs
+- Use parameterized queries for databases
+- Keep dependencies updated
+- Follow OWASP guidelines
 
-### Documentation Standards
-```javascript
-/**
- * Authenticates a user with credentials
- * @param {Object} credentials - User credentials
- * @param {string} credentials.email - User email
- * @param {string} credentials.password - User password
- * @returns {Promise<User>} Authenticated user object
- * @throws {AuthError} If authentication fails
- * @example
- * const user = await authenticate({
- *   email: 'user@example.com',
- *   password: 'securePassword123'
- * });
- */
-async function authenticate(credentials) {
-  // Implementation
-}
-```
+## Questions?
 
-## 🏆 Recognition
+Feel free to:
+- Open an issue for questions
+- Join our Discord community
+- Email maintainers@example.com
 
-Contributors will be:
-- Listed in CONTRIBUTORS.md
-- Mentioned in release notes
-- Given credit in commit co-authors
+## Recognition
 
-## 💬 Getting Help
+Contributors will be recognized in:
+- CONTRIBUTORS.md file
+- Release notes
+- Project README
 
-- **Questions**: Open a discussion
-- **Bugs**: Open an issue
-- **Security**: See SECURITY.md
-- **Chat**: Join our Discord
-
-## 📋 Checklist for Contributors
-
-Before submitting your PR, ensure:
-
-- [ ] Tests written and passing
-- [ ] Documentation updated
-- [ ] Lint and format passing
-- [ ] Accessibility verified
-- [ ] Performance checked
-- [ ] Security considered
-- [ ] PR template completed
-
-Thank you for contributing! 🎉
+Thank you for contributing!

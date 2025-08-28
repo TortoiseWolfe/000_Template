@@ -1,265 +1,193 @@
 # Security Policy
 
-## 🔒 Reporting Security Vulnerabilities
+## Supported Versions
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+We release patches for security vulnerabilities. Currently supported versions:
 
-If you discover a security vulnerability, please send an email to:
-security@example.com
-
-Please include:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if any)
-
-You should receive a response within 48 hours.
-
-## 🛡️ Security Measures
-
-### Authentication & Authorization
-- JWT-based authentication with refresh tokens
-- Session management with secure cookies
-- Role-based access control (RBAC)
-- Multi-factor authentication support
-- Account lockout after failed attempts
-
-### Data Protection
-- TLS 1.3 for all connections
-- AES-256 encryption at rest
-- Secure password hashing (bcrypt/argon2)
-- PII data encryption
-- Secure key management
-
-### Input Validation
-- Server-side validation for all inputs
-- Parameterized queries (SQL injection prevention)
-- XSS protection via Content Security Policy
-- File upload scanning and validation
-- Rate limiting on all endpoints
-
-### Security Headers
-```javascript
-// Configured CSP headers
-Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline';
-X-Frame-Options: DENY
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 1; mode=block
-Strict-Transport-Security: max-age=31536000; includeSubDomains
-```
-
-### Dependency Management
-- Regular dependency updates
-- Automated vulnerability scanning
-- License compliance checking
-- Supply chain security
-
-## 🔍 Security Checklist
-
-### For Contributors
-- [ ] No hardcoded secrets or credentials
-- [ ] Input validation implemented
-- [ ] Error messages don't leak sensitive info
-- [ ] Authentication required for protected routes
-- [ ] Rate limiting considered
-- [ ] Logging doesn't include PII
-- [ ] SQL injection prevention
-- [ ] XSS prevention measures
-
-### For Reviewers
-- [ ] Check for hardcoded secrets
-- [ ] Verify input validation
-- [ ] Review authentication logic
-- [ ] Check error handling
-- [ ] Verify secure communication
-- [ ] Review dependency changes
-- [ ] Check for security anti-patterns
-
-## 🚨 Security Anti-Patterns to Avoid
-
-### Never Do This:
-```javascript
-// ❌ BAD: SQL injection vulnerability
-const query = `SELECT * FROM users WHERE id = ${userId}`;
-
-// ❌ BAD: XSS vulnerability
-element.innerHTML = userInput;
-
-// ❌ BAD: Hardcoded secrets
-const apiKey = "sk_live_abcd1234";
-
-// ❌ BAD: Weak password requirements
-if (password.length >= 4) { /* accept */ }
-
-// ❌ BAD: Exposing sensitive data in logs
-console.log(`User ${email} logged in with password ${password}`);
-
-// ❌ BAD: Using eval
-eval(userInput);
-
-// ❌ BAD: Disabled HTTPS verification
-process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-```
-
-### Always Do This:
-```javascript
-// ✅ GOOD: Parameterized query
-const query = 'SELECT * FROM users WHERE id = $1';
-db.query(query, [userId]);
-
-// ✅ GOOD: Safe text insertion
-element.textContent = userInput;
-
-// ✅ GOOD: Environment variables
-const apiKey = process.env.API_KEY;
-
-// ✅ GOOD: Strong password requirements
-const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-
-// ✅ GOOD: Safe logging
-logger.info(`User ${userId} logged in`);
-
-// ✅ GOOD: Safe JSON parsing
-JSON.parse(userInput);
-
-// ✅ GOOD: Proper TLS handling
-const https = require('https');
-```
-
-## 🔐 Environment Variables
-
-### Required Security Variables
-```bash
-# Authentication
-SESSION_SECRET=       # Min 32 characters
-JWT_SECRET=          # Min 32 characters
-REFRESH_SECRET=      # Min 32 characters
-
-# Encryption
-ENCRYPTION_KEY=      # 256-bit key
-ENCRYPTION_IV=       # Initialization vector
-
-# Rate Limiting
-RATE_LIMIT_WINDOW=60000
-RATE_LIMIT_MAX=100
-
-# Security Headers
-CSP_DIRECTIVES=
-ALLOWED_ORIGINS=
-```
-
-### Generating Secure Secrets
-```bash
-# Generate secure random strings
-openssl rand -base64 32
-
-# Generate encryption key
-openssl rand -hex 32
-
-# Generate strong password
-openssl rand -base64 24
-```
-
-## 🛠️ Security Tools
-
-### Automated Scanning
-- **npm audit**: Dependency vulnerabilities
-- **Snyk**: Comprehensive security scanning
-- **TruffleHog**: Secret detection
-- **Semgrep**: SAST scanning
-- **OWASP ZAP**: Dynamic security testing
-
-### Manual Testing
-```bash
-# Check for vulnerabilities
-npm audit
-
-# Fix vulnerabilities
-npm audit fix
-
-# Check with Snyk
-snyk test
-
-# Secret scanning
-trufflehog filesystem .
-
-# OWASP dependency check
-dependency-check --scan .
-```
-
-## 📊 Security Monitoring
-
-### What We Monitor
-- Failed login attempts
-- Unusual access patterns
-- API rate limit violations
-- File upload attempts
-- Permission escalation attempts
-- Database query patterns
-
-### Incident Response
-1. **Detection**: Automated alerts
-2. **Assessment**: Evaluate impact
-3. **Containment**: Isolate affected systems
-4. **Eradication**: Remove threat
-5. **Recovery**: Restore services
-6. **Lessons Learned**: Post-mortem
-
-## 🔄 Security Updates
-
-### Update Schedule
-- **Critical**: Within 24 hours
-- **High**: Within 7 days
-- **Medium**: Within 30 days
-- **Low**: Next release cycle
-
-### Supported Versions
 | Version | Supported          |
 | ------- | ------------------ |
-| 2.x.x   | :white_check_mark: |
 | 1.x.x   | :white_check_mark: |
 | < 1.0   | :x:                |
 
-## 📋 Compliance
+## Reporting a Vulnerability
 
-### Standards We Follow
-- **OWASP Top 10**: Web application security
-- **GDPR**: Data privacy (EU)
-- **CCPA**: Data privacy (California)
-- **WCAG 2.1**: Accessibility
-- **ISO 27001**: Information security
+**Please do not report security vulnerabilities through public GitHub issues.**
 
-### Regular Audits
-- Quarterly dependency scanning
-- Annual penetration testing
-- Continuous security monitoring
-- Code review for security
+Instead, please report them via email to: security@example.com
 
-## 🎓 Security Resources
+You should receive a response within 48 hours. If for some reason you do not, please follow up via email to ensure we received your original message.
 
-### Learning
-- [OWASP Guidelines](https://owasp.org/)
+Please include as much of the following information as possible:
+
+- Type of issue (e.g., buffer overflow, SQL injection, cross-site scripting, etc.)
+- Full paths of source file(s) related to the issue
+- The location of the affected source code (tag/branch/commit or direct URL)
+- Any special configuration required to reproduce the issue
+- Step-by-step instructions to reproduce the issue
+- Proof-of-concept or exploit code (if possible)
+- Impact of the issue, including how an attacker might exploit it
+
+## Preferred Languages
+
+We prefer all communications to be in English.
+
+## Disclosure Policy
+
+When we receive a security bug report, we will:
+
+1. Confirm the problem and determine affected versions
+2. Audit code to find any similar problems
+3. Prepare fixes for all supported releases
+4. Release patches as soon as possible
+
+## Security Best Practices
+
+### For Contributors
+
+#### Authentication & Authorization
+- Use strong, industry-standard authentication mechanisms
+- Implement proper session management
+- Use secure password policies (minimum 12 characters)
+- Implement account lockout mechanisms
+- Use multi-factor authentication where possible
+
+#### Data Protection
+- Encrypt sensitive data at rest and in transit
+- Use parameterized queries to prevent SQL injection
+- Validate and sanitize all user inputs
+- Implement proper error handling without exposing sensitive information
+- Follow the principle of least privilege
+
+#### Secure Coding
+- Keep dependencies up to date
+- Use security linters and static analysis tools
+- Never hardcode secrets or credentials
+- Use environment variables for configuration
+- Implement proper logging without sensitive data
+
+#### API Security
+- Use HTTPS for all communications
+- Implement rate limiting
+- Validate all API inputs
+- Use proper CORS configuration
+- Implement API versioning
+
+### For Users
+
+#### Installation Security
+1. Always verify package integrity
+2. Use official sources for downloads
+3. Keep the application updated
+4. Review dependency licenses
+
+#### Configuration Security
+1. Change all default passwords
+2. Use strong, unique passwords
+3. Enable all available security features
+4. Regularly review access logs
+5. Implement network segmentation
+
+#### Operational Security
+1. Regular security audits
+2. Monitor for suspicious activity
+3. Implement backup strategies
+4. Test disaster recovery procedures
+5. Train staff on security awareness
+
+## Security Features
+
+This template includes the following security features:
+
+### Built-in Protections
+- **CSP Headers**: Content Security Policy configured
+- **Rate Limiting**: Prevents brute force attacks
+- **Input Validation**: All inputs validated and sanitized
+- **SQL Injection Prevention**: Parameterized queries
+- **XSS Protection**: Output encoding and CSP
+- **CSRF Protection**: Token-based protection
+- **Secure Sessions**: HTTPOnly, Secure, SameSite cookies
+
+### Authentication
+- JWT with short expiration times
+- Refresh token rotation
+- Password strength requirements
+- Account lockout after failed attempts
+- Secure password reset flow
+
+### Data Security
+- Encryption at rest (AES-256)
+- TLS 1.3 for data in transit
+- Secure key management
+- Data minimization principles
+- GDPR compliance ready
+
+### Monitoring & Auditing
+- Comprehensive audit logging
+- Anomaly detection
+- Real-time alerting
+- Security event tracking
+- Compliance reporting
+
+## Security Checklist
+
+Before deploying to production:
+
+- [ ] All dependencies updated
+- [ ] Security scan completed
+- [ ] Penetration testing performed
+- [ ] SSL/TLS properly configured
+- [ ] Secrets management implemented
+- [ ] Backup strategy in place
+- [ ] Incident response plan created
+- [ ] Security headers configured
+- [ ] Rate limiting enabled
+- [ ] Logging and monitoring active
+- [ ] Access controls reviewed
+- [ ] Data encryption verified
+- [ ] OWASP Top 10 addressed
+- [ ] Security training completed
+- [ ] Documentation updated
+
+## Vulnerability Scanning
+
+Regular scanning schedule:
+- **Daily**: Dependency vulnerability scanning
+- **Weekly**: Static code analysis
+- **Monthly**: Dynamic application security testing
+- **Quarterly**: Penetration testing
+- **Annually**: Full security audit
+
+## Compliance
+
+This template helps meet requirements for:
+- OWASP Application Security Verification Standard (ASVS)
+- PCI DSS (Payment Card Industry Data Security Standard)
+- GDPR (General Data Protection Regulation)
+- CCPA (California Consumer Privacy Act)
+- SOC 2 Type II
+- ISO 27001
+
+## Resources
+
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [CWE Top 25](https://cwe.mitre.org/top25/)
+- [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)
 - [Security Headers](https://securityheaders.com/)
-- [Mozilla Observatory](https://observatory.mozilla.org/)
-- [Web Security Academy](https://portswigger.net/web-security)
-
-### Tools
-- [Have I Been Pwned](https://haveibeenpwned.com/)
 - [SSL Labs](https://www.ssllabs.com/ssltest/)
-- [Security Checklist](https://securitycheckli.st/)
 
-## 📞 Contact
+## Security Contacts
 
-For security concerns:
-- Email: security@example.com
-- PGP Key: [Public key fingerprint]
+- Security Team: security@example.com
+- Bug Bounty Program: bugbounty@example.com
+- Emergency Hotline: +1-555-0123 (24/7)
 
-Response times:
-- Critical: 4 hours
-- High: 24 hours
-- Medium: 48 hours
-- Low: 1 week
+## Acknowledgments
+
+We thank the following individuals for responsibly disclosing security issues:
+
+- [Contributors will be listed here]
 
 ---
 
-Thank you for helping keep PROJECT_NAME secure! 🛡️
+*Last updated: [Current Date]*
+*Next review: [Quarterly]*
